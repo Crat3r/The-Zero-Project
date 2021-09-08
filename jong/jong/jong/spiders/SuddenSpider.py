@@ -3,6 +3,7 @@ from selenium import webdriver
 from scrapy.http import HtmlResponse
 from scrapy.exceptions import CloseSpider
 from selenium.common.exceptions import NoSuchElementException
+import time
 
 class SuddenSpider(scrapy.Spider):
     name = "sudden"
@@ -30,6 +31,23 @@ class SuddenSpider(scrapy.Spider):
         driver.execute_script("arguments[0].click();", nick)
 
         driver.switch_to_window(driver.window_handles[1])
+
+        screen_height = driver.execute_script("return window.screen.height;")
+
+        scroll_pause_time = 0.25
+
+        i = 1
+
+        while True:
+            # scroll one screen height each time
+            driver.execute_script("window.scrollTo(0, {screen_height}*{i});".format(screen_height=screen_height, i=i))  
+            i += 0.5
+            time.sleep(scroll_pause_time)
+            # update scroll height each time after scrolled, as the scroll height can change after we scrolled the page
+            scroll_height = driver.execute_script("return document.body.scrollHeight;")  
+            # Break the loop when the height we need to scroll to is larger than the total scroll height
+            if (screen_height) * i > scroll_height:
+                break 
 
         print(driver.current_url)
 
